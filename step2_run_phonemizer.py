@@ -4,7 +4,7 @@ import sys, os, glob
 
 # n.b. phonemizer requires eSpeak for multilingual support
 # eSpeak 1.48.04 installed @ /usr/local/Cellar/espeak/1.48.04_1/bin/espeak
-langcodes = { 'Cantonese':'yue', 'Croatian':'hr', 'Danish':'da', 'Dutch':'nl',
+langcodes = { 'Cantonese':'zh-yue', 'Croatian':'hr', 'Danish':'da', 'Dutch':'nl',
               'EnglishUK':'en-gb', 'Estonian':'et', 'French':'fr-fr', 'German':'de', 
               'Hungarian':'hu', 'Indonesian':'id', 'Irish':'ga', 'Italian':'it', 
               'Mandarin':'cmn', 'Polish':'pl', 'Spanish':'es', 'Swedish':'sv' }
@@ -25,7 +25,11 @@ for filein in glob.glob(directory+'*.txt', recursive=True):
     fileout = filein.replace('non_child_utterances', 'phonemized').replace('.txt', '_phonemes.txt')  # name of fileout
     print(corpuscount, filein, lang, fileout)
     os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))  # phonemize
-    if lang=='Mandarin':  # amendment for Chinese Mandarin: rm punctuation in phonemes and code-switching markers
-        os.system("cat %s | sed 's/\.//g; s/-//g' | egrep -v '\(zh\)|\(en\)' > %s" % (fileout, fileout))
+    if language=='Mandarin':  # amendment for Chinese Mandarin: rm punctuation in phonemes and code-switching markers
+        os.system("cat %s | sed 's/\.//g; s/-//g' | egrep -v '\(zh\)|\(en\)' > tmp.txt" % fileout)
+        os.system("mv tmp.txt %s" % fileout)  # put back in place
+    elif language=='Cantonese':  # ditto for Cantonese
+        os.system("cat %s | sed 's/\.//g; s/-//g' | egrep -v '\(zhy\)|\(en\)' > tmp.txt" % fileout)
+        os.system("mv tmp.txt %s" % fileout)  # put back in place
 
 print("== FINISHED ==")

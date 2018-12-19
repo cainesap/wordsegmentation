@@ -13,7 +13,9 @@ You'll need to install the following Python packages: [NLTK](https://www.nltk.or
 
 And also install [R](https://www.r-project.org), along with the [zipfR](http://zipfr.r-forge.r-project.org) library (run R and enter `install.packages('zipfR')`).
 
-Finally, this experiment depends on the [phonemizer](https://github.com/bootphon/phonemizer) and [wordseg](https://wordseg.readthedocs.io) tools developed by Alex Cristia, Mathieu Bernard, and colleagues. Please see the installation instructions on their websites. Note that phonemizer requires the `festival` and `espeak` text-to-speech systems (we use espeak). Wordseg has various dependencies too, [detailed here](https://wordseg.readthedocs.io/en/latest/installation.html).
+Finally, this experiment depends on the [phonemizer](https://github.com/bootphon/phonemizer) and [wordseg](https://wordseg.readthedocs.io) tools developed by Alex Cristia, Mathieu Bernard, and colleagues. Please see the installation instructions on their websites. Note that phonemizer requires the `festival` and/or `eSpeak` text-to-speech systems (we use espeak), and that eSpeak requires extra dictionary compilation for Cantonese, Mandarin and Russian.
+
+Wordseg has various dependencies too, [detailed here](https://wordseg.readthedocs.io/en/latest/installation.html).
 
 
 ## Data
