@@ -65,25 +65,29 @@ for corpuspath in glob.glob(directory+'*/*/', recursive=True):
         sents = []
         sentcount = 0
         underscore = re.compile('\w+_\w+')
-        fileout = '/Users/' + uname + '/Corpora/CHILDES/non_child_utterances/' + language + '_' + collection + '_' + child + '_max' + str(limit) + '_utterances.txt'  # andrew
-        with io.open(fileout, 'w', encoding='utf8') as myfile:
-            for fid in fidlist:
-                sentslist = corpus.sents(fid, speaker=plist)
-                for sent in sentslist:
-                    sent = [w.lower() for w in sent if not re.match('.*(www|xxx|yyy|zzz).*|\W|^(h*m{2,}h*m*|m*hmh*|pft|pst|pjj|t(fu){2,}|xxs|uh+uh)$', w)]  # lowercase each word and exclude fillers
-                    for i, w in enumerate(sent):  # check for merged underscore tokens in sentence and split if necessary
-                        if underscore.match(w):
-                            words = w.split('_')  # unmerge token
-                            sent[i] = words[0]
-                            sent.insert(i+1, words[1])
-                    if (len(sent)>0) and (limit==0 or sentcount<limit):  # check for content in utterance
-                        text = re.sub('\s+', ' ', ' '.join(sent).lstrip())
-                        if (len(text)>0):
-                            sentcount += 1
-                            myfile.write(text+"\n")
-                            #print(text)
-        myfile.close()
+        cds = ''
+        for fid in fidlist:
+            sentslist = corpus.sents(fid, speaker=plist)
+            for sent in sentslist:
+                sent = [w.lower() for w in sent if not re.match('.*(www|xxx|yyy|zzz).*|\W|^(h*m{2,}h*m*|m*hmh*|pft|pst|pjj|t(fu){2,}|xxs|uh+uh)$', w)]  # lowercase each word and exclude fillers
+                for i, w in enumerate(sent):  # check for merged underscore tokens in sentence and split if necessary
+                    if underscore.match(w):
+                        words = w.split('_')  # unmerge token
+                        sent[i] = words[0]
+                        sent.insert(i+1, words[1])
+                if (len(sent)>0) and (limit==0 or sentcount<limit):  # check for content in utterance, check s.count against threshold
+                    text = re.sub('\s+', ' ', ' '.join(sent).lstrip())
+                    if (len(text)>0):
+                        sentcount += 1
+                        cds += text+"\n"
         print("N non-child utterances in corpus = %d" % sentcount)
-        print("Saved to %s" % fileout)
+        if sentcount==limit or limit==0:  # if we've reached the threshold (or there isn't one)
+            fileout = '/Users/' + uname + '/Corpora/CHILDES/non_child_utterances/' + language + '_' + collection + '_' + child + '_' + str(limit) + 'utterances.txt'
+            with io.open(fileout, 'w', encoding='utf8') as myfile:
+                myfile.write(cds)
+                myfile.close()
+                print("Saved to %s" % fileout)
+        else:
+            print("Not saved, didn't reach the threshold")
 
 print("FINISHED: processed %d corpora" % corpuscount)
