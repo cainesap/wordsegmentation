@@ -34,7 +34,7 @@ Experiment output files will save to your working directory (i.e. where you down
 
 ## Usage
 
-1. Corpus preparation: takes XML transcriptions for all corpora in the data directory, filters child utterances, and outputs plain text strings one line per utterance if there are the requisite number of non-child utterances in the corpus (default=10000; must be edited in file, and can be set to 0 as 'no limit'). Run as --
+1. Corpus preparation: takes XML transcriptions for all corpora in the data directory, filters child utterances, and outputs plain text strings one line per utterance if there are the requisite number of non-child utterances in the corpus (default=10000; must be edited in file, and can be set to 0 as 'no limit'). Also counts corpora, non-child utterances and words, and outputs a statistics file in the directory above the XML. Run as --
 ```
 python3 step1_prepare_childes_xml_for_phonemizer.py
 ```
