@@ -2,16 +2,20 @@
 # coding: utf-8
 import sys, os, glob
 
-# n.b. phonemizer requires eSpeak for multilingual support
-# eSpeak 1.48.04 installed @ /usr/local/Cellar/espeak/1.48.04_1/bin/espeak
-langcodes = { 'Cantonese':'zh-yue', 'Croatian':'hr', 'Danish':'da', 'Dutch':'nl',
-              'EnglishUK':'en-gb', 'Estonian':'et', 'French':'fr-fr', 'German':'de', 
-              'Hungarian':'hu', 'Indonesian':'id', 'Irish':'ga', 'Italian':'it', 
-              'Mandarin':'cmn', 'Polish':'pl', 'Spanish':'es', 'Swedish':'sv' }
+# n.b. phonemizer requires eSpeak and segments for multilingual support
+langcodes = { 'Basque':'eu', 'Cantonese':'zh-yue', 'Croatian':'hr', 'Danish':'da', 'Dutch':'nl',
+              'EnglishNA':'en-us', 'EnglishUK':'en-gb', 'Estonian':'et', 'Farsi':'fa', 'French':'fr-fr', 'German':'de', 
+              'Hungarian':'hu', 'Icelandic':'is', 'Indonesian':'id', 'Irish':'ga', 'Italian':'it', 'Japanese':'ja', 'Korean':'ko',
+              'Mandarin':'cmn', 'Norwegian':'no', 'Polish':'pl', 'PortugueseBR':'pt-br', 'PortuguesePT':'pt-pt',
+              'Romanian':'ro', 'Serbian':'sv', 'Spanish':'es', 'Swedish':'sv', 'Turkish':'tr', 'Welsh':'cy' }
 
 # get username
 import getpass
 uname = getpass.getuser()
+
+# utterance limit? Or zero for no limit
+#limit = 0
+limit = 10000
 
 # work through all corpora in the CHILDES non_child_utterance directory: assumes 'language_collection_child' filename pattern set in step1
 directory = '/Users/' + uname + '/Corpora/CHILDES/non_child_utterances/'
@@ -24,12 +28,20 @@ for filein in glob.glob(directory+'*.txt', recursive=True):
     lang = langcodes[language]
     fileout = filein.replace('non_child_utterances', 'phonemized').replace('.txt', '_phonemes.txt')  # name of fileout
     print(corpuscount, filein, lang, fileout)
-    os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))  # phonemize
+    # phonemize command
+    if language=='Japanese':  # use segments for Japanese, as transcript in romanized form
+        os.system("cat %s | phonemize -b segments -s ';esyll ' -w ';eword ' -l japanese -o %s" % (filein, fileout))
+    else:
+        #os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))
+        os.system("cat %s | phonemize -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))  # phone separator hard-coded (space as separator parameter breaks in phonemizer 1.0)
     if language=='Mandarin':  # amendment for Chinese Mandarin: rm punctuation in phonemes and code-switching markers
         os.system("cat %s | sed 's/\.//g; s/-//g' | egrep -v '\(zh\)|\(en\)' > tmp.txt" % fileout)
         os.system("mv tmp.txt %s" % fileout)  # put back in place
     elif language=='Cantonese':  # ditto for Cantonese
         os.system("cat %s | sed 's/\.//g; s/-//g' | egrep -v '\(zhy\)|\(en\)' > tmp.txt" % fileout)
         os.system("mv tmp.txt %s" % fileout)  # put back in place
+    # limit file to first N utterances if necessary
+    if limit>0:
+        os.system("head -n %i %s > tmp.txt; mv tmp.txt %s" % (fileout, limit, fileout))
 
 print("== FINISHED ==")

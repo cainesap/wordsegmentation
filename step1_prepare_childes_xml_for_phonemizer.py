@@ -9,10 +9,9 @@ import getpass
 uname = getpass.getuser()
 
 
-# utterance limit? value of zero means include all utterances
-#limit = 0
-limit = 10000
-strlimit = str(limit)
+# utterance threshold? value of zero means there isn't one
+# threshold = 0
+threshold = 10000
 
 
 # work through all corpora in the CHILDES XML directory: must have 'language/collection/(subcorpus)/*.xml' structure
@@ -80,20 +79,20 @@ with io.open(statsfile, 'w', encoding='utf8') as stats:
                             sent[i] = words[0]
                             sent.insert(i+1, words[1])
                     wordcount += len(sent)  # word count
-                    if (len(sent)>0) and (limit==0 or sentcount<limit):  # check for content in utterance, check s.count against threshold
+                    if (len(sent)>0):  # check for content in utterance
                         text = re.sub('\s+', ' ', ' '.join(sent).lstrip())
                         if (len(text)>0):
                             sentcount += 1
                             cds += text+"\n"
             print("N non-child utterances in corpus = %d" % sentcount)
-            if sentcount==limit or limit==0:  # if we've reached the threshold (or there isn't one)
+            if sentcount>=threshold or threshold==0:  # if we've reached the threshold, or there isn't one
                 corpuscount += 1
-                fileout = '/Users/' + uname + '/Corpora/CHILDES/non_child_utterances/' + language + '_' + collection + '_' + child + '_' + strlimit + 'utterances.txt'
+                fileout = '/Users/' + uname + '/Corpora/CHILDES/non_child_utterances/' + language + '_' + collection + '_' + child + '_' + str(threshold) + 'utterances.txt'
                 with io.open(fileout, 'w', encoding='utf8') as myfile:
                     myfile.write(cds)
                     myfile.close()
                     print("Saved to %s" % fileout)
-                    statsline = str(corpuscount) + '\t' + language + '\t' + collection + '\t' + child + '\t' + strlimit + '\t' + str(sentcount) + '\t' + str(wordcount) + '\n'
+                    statsline = str(corpuscount) + '\t' + language + '\t' + collection + '\t' + child + '\t' + str(threshold) + '\t' + str(sentcount) + '\t' + str(wordcount) + '\n'
                     stats.write(statsline)
             else:
                 print("Not saved, didn't reach the threshold")

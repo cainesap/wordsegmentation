@@ -13,14 +13,16 @@ You'll need to install the following Python packages: [NLTK](https://www.nltk.or
 
 And also install [R](https://www.r-project.org), along with the [zipfR](http://zipfr.r-forge.r-project.org) library (run R and enter `install.packages('zipfR')`).
 
-Finally, this experiment depends on the [phonemizer](https://github.com/bootphon/phonemizer) and [wordseg](https://wordseg.readthedocs.io) tools developed by Alex Cristia, Mathieu Bernard, and colleagues. Please see the installation instructions on their websites. Note that phonemizer requires the `festival` and/or `eSpeak` text-to-speech systems (we use espeak), and that eSpeak requires extra dictionary compilation for Cantonese, Mandarin and Russian.
+Finally, this experiment depends on the [phonemizer](https://github.com/bootphon/phonemizer) and [wordseg](https://wordseg.readthedocs.io) tools developed by Alex Cristia, Mathieu Bernard, and colleagues. Please see the installation instructions on their websites. Note that phonemizer requires `festival` and/or `eSpeak` as back-end text-to-speech systems, plus optionally segments grapheme-to-phoneme mapping. We use [espeak-ng](https://github.com/espeak-ng/espeak-ng) with extended dictionaries for Cantonese, Mandarin, Russian; plus [segments](https://github.com/cldf/segments) for Japanese etc.
 
 Wordseg has various dependencies too, [detailed here](https://wordseg.readthedocs.io/en/latest/installation.html).
 
 
 ## Data
 
-Note that these experiments were run on XML corpora downloaded from [CHILDES](https://childes.talkbank.org/data-xml). We unzip and store the files under the path `~/Corpora/CHILDES/xml/` on a Unix-like system (i.e. Mac, Linux). Our corpus selections depended on factors described in our paper. In total we worked with 41 corpus collections, containing 70 child corpora and covering 16 languages. Note that we removed the 'Lara-Diary' and '0extra' directories in the Lara and LeeWongLeung collections respectively.
+Note that these experiments were run on XML corpora downloaded from [CHILDES](https://childes.talkbank.org/data-xml). We unzip and store the files under the path `~/Corpora/CHILDES/xml/` on a Unix-like system (i.e. Mac, Linux). Our corpus selections depended on factors described in our paper. In total we worked with 41 corpus collections, containing 70 child corpora and covering 16 languages.
+
+Note that we removed the diary and 0notrans/0untranscribed/0extra directories in the Lara (Eng.UK), Braunwald, MacWhinney, Nelson (Eng.NA) and LeeWongLeung collections before further processing.
 
 
 ## Directory structure
@@ -34,12 +36,12 @@ Experiment output files will save to your working directory (i.e. where you down
 
 ## Usage
 
-1. Corpus preparation: takes XML transcriptions for all corpora in the data directory, filters child utterances, and outputs plain text strings one line per utterance if there are the requisite number of non-child utterances in the corpus (default=10000; must be edited in file, and can be set to 0 as 'no limit'). Also counts corpora, non-child utterances and words, and outputs a statistics file in the directory above the XML. Run as --
+1. Corpus preparation: takes XML transcriptions for all corpora in the data directory, filters child utterances, and outputs plain text strings one line per utterance if there are the requisite number of non-child utterances in the corpus (default=10000; must be edited in file). Also counts corpora, non-child utterances and words, and outputs a statistics file in the directory above the XML. Run as --
 ```
 python3 step1_prepare_childes_xml_for_phonemizer.py
 ```
 
-2. Phonemize the corpora: transforms plain text utterances and transforms them into phonemic form with the `phonemizer` and `eSpeak` toolkits. Deals with a known set of languages, listed at the top of the script (to add new languages: add to the dictionary in the script with the new language name and eSpeak code, available by querying `espeak --voices` from the command line). Run as --
+2. Phonemize the corpora: transforms plain text utterances and transforms them into phonemic form with the `phonemizer` toolkit. Deals with a known set of languages, listed at the top of the script (to add new languages: add to the dictionary in the script with the new language name and eSpeak code, available by querying `espeak --voices` from the command line). Outputs a limited number of utterances (default=10000; edit in file, or set to zero to indicate no limit). Note that we used espeak-ng (version 1.49.3) for all languages except segments for Japanese. Run as --
 ```
 python3 step2_run_phonemizer.py
 ```
