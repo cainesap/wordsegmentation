@@ -42,6 +42,6 @@ for filein in glob.glob(directory+'*.txt', recursive=True):
         os.system("mv tmp.txt %s" % fileout)  # put back in place
     # limit file to first N utterances if necessary
     if limit>0:
-        os.system("head -n %i %s > tmp.txt; mv tmp.txt %s" % (fileout, limit, fileout))
+        os.system("head -n %i %s > tmp.txt; mv tmp.txt %s" % (limit, fileout, fileout))
 
 print("== FINISHED ==")
