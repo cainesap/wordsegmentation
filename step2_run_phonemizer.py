@@ -4,7 +4,7 @@ import sys, os, glob
 
 # n.b. phonemizer requires eSpeak and segments for multilingual support
 langcodes = { 'Basque':'eu', 'Cantonese':'zh-yue', 'Croatian':'hr', 'Danish':'da', 'Dutch':'nl',
-              'EnglishNA':'en-us', 'EnglishUK':'en-gb', 'Estonian':'et', 'Farsi':'fa', 'French':'fr-fr', 'German':'de', 
+              'EnglishNA':'en-us', 'EnglishUK':'en-gb', 'Estonian':'et', 'Farsi':'fa', 'French':'fr-fr', 'German':'de', 'Greek':'el',
               'Hungarian':'hu', 'Icelandic':'is', 'Indonesian':'id', 'Irish':'ga', 'Italian':'it', 'Japanese':'ja', 'Korean':'ko',
               'Mandarin':'cmn', 'Norwegian':'no', 'Polish':'pl', 'PortugueseBR':'pt-br', 'PortuguesePT':'pt-pt',
               'Romanian':'ro', 'Serbian':'sv', 'Spanish':'es', 'Swedish':'sv', 'Turkish':'tr', 'Welsh':'cy' }
