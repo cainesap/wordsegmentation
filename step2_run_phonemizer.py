@@ -3,10 +3,10 @@
 import sys, os, glob
 
 # n.b. phonemizer requires eSpeak and segments for multilingual support
-langcodes = { 'Basque':'eu', 'Cantonese':'zh-yue', 'Croatian':'hr', 'Danish':'da', 'Dutch':'nl',
+langcodes = { 'Basque':'eu', 'Cantonese':'yue', 'Croatian':'hr', 'Danish':'da', 'Dutch':'nl',
               'EnglishNA':'en-us', 'EnglishUK':'en-gb', 'Estonian':'et', 'Farsi':'fa', 'French':'fr-fr', 'German':'de', 'Greek':'el',
               'Hungarian':'hu', 'Icelandic':'is', 'Indonesian':'id', 'Irish':'ga', 'Italian':'it', 'Japanese':'ja', 'Korean':'ko',
-              'Mandarin':'cmn', 'Norwegian':'no', 'Polish':'pl', 'PortugueseBR':'pt-br', 'PortuguesePT':'pt-pt',
+              'Mandarin':'cmn', 'Norwegian':'nb', 'Polish':'pl', 'PortugueseBR':'pt-br', 'PortuguesePT':'pt-pt',
               'Romanian':'ro', 'Serbian':'sv', 'Spanish':'es', 'Swedish':'sv', 'Turkish':'tr', 'Welsh':'cy' }
 
 # get username
@@ -30,16 +30,15 @@ for filein in glob.glob(directory+'*.txt', recursive=True):
     print(corpuscount, filein, lang, fileout)
     # phonemize command
     if language=='Japanese':  # use segments for Japanese, as transcript in romanized form
-        os.system("cat %s | phonemize -b segments -s ';esyll ' -w ';eword ' -l japanese -o %s" % (filein, fileout))
         os.system("cat %s | phonemize -b segments -p ' ' -s ';esyll ' -w ';eword ' -l japanese -o %s" % (filein, fileout))
     else:
         #os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))
         os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))
     if language=='Mandarin':  # amendment for Chinese Mandarin: rm punctuation in phonemes and code-switching markers
-        os.system("cat %s | sed 's/\.//g; s/-//g' | egrep -v '\(zh\)|\(en\)' > tmp.txt" % fileout)
+        os.system("cat %s | sed 's/\.//g; s/-//g'; s/(zh)//g; s/(en)//g' > tmp.txt" % fileout)
         os.system("mv tmp.txt %s" % fileout)  # put back in place
     elif language=='Cantonese':  # ditto for Cantonese
-        os.system("cat %s | sed 's/\.//g; s/-//g' | egrep -v '\(zhy\)|\(en\)' > tmp.txt" % fileout)
+        os.system("cat %s | sed 's/\.//g; s/-//g; s/(zhy)//g; s/(en)//g' > tmp.txt" % fileout)
         os.system("mv tmp.txt %s" % fileout)  # put back in place
     # limit file to first N utterances if necessary
     if limit>0:
