@@ -31,9 +31,10 @@ for filein in glob.glob(directory+'*.txt', recursive=True):
     # phonemize command
     if language=='Japanese':  # use segments for Japanese, as transcript in romanized form
         os.system("cat %s | phonemize -b segments -s ';esyll ' -w ';eword ' -l japanese -o %s" % (filein, fileout))
+        os.system("cat %s | phonemize -b segments -p ' ' -s ';esyll ' -w ';eword ' -l japanese -o %s" % (filein, fileout))
     else:
         #os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))
-        os.system("cat %s | phonemize -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))  # phone separator hard-coded (space as separator parameter breaks in phonemizer 1.0)
+        os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))
     if language=='Mandarin':  # amendment for Chinese Mandarin: rm punctuation in phonemes and code-switching markers
         os.system("cat %s | sed 's/\.//g; s/-//g' | egrep -v '\(zh\)|\(en\)' > tmp.txt" % fileout)
         os.system("mv tmp.txt %s" % fileout)  # put back in place
@@ -45,3 +46,4 @@ for filein in glob.glob(directory+'*.txt', recursive=True):
         os.system("head -n %i %s > tmp.txt; mv tmp.txt %s" % (limit, fileout, fileout))
 
 print("== FINISHED ==")
+print("Processed %i corpora in %i languages" % (corpuscount, len(langcodes)))
