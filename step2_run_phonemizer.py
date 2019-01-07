@@ -6,7 +6,7 @@ import sys, os, glob
 langcodes = { 'Basque':'eu', 'Cantonese':'yue', 'Croatian':'hr', 'Danish':'da', 'Dutch':'nl',
               'EnglishNA':'en-us', 'EnglishUK':'en-gb', 'Estonian':'et', 'Farsi':'fa', 'French':'fr-fr', 'German':'de', 'Greek':'el',
               'Hungarian':'hu', 'Icelandic':'is', 'Indonesian':'id', 'Irish':'ga', 'Italian':'it', 'Japanese':'ja', 'Korean':'ko',
-              'Mandarin':'cmn', 'Norwegian':'nb', 'Polish':'pl', 'PortugueseBR':'pt-br', 'PortuguesePT':'pt-pt',
+              'Mandarin':'cmn', 'Norwegian':'nb', 'Polish':'pl', 'PortugueseBR':'pt-br', 'PortuguesePT':'pt',
               'Romanian':'ro', 'Serbian':'sv', 'Spanish':'es', 'Swedish':'sv', 'Turkish':'tr', 'Welsh':'cy' }
 
 # get username
