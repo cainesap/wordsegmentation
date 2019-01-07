@@ -148,7 +148,8 @@ for filein in glob.glob(directory+'*_phonemes.txt', recursive=True):
                 owucount += 1
             #print('utterance: %s' % (line.rstrip()))
             phones = line.split()  # split on whitespace
-            phonecount += (phones-ewords)
+            nwords = len(phones) - ewords
+            phonecount += nwords
             for (i, phone) in enumerate(phones):
                 if i==0 or phones[i]==';eword' or phones[i-1]==';eword':
                     pass  # ignore phone 1 in utterance or word and word delimiters
