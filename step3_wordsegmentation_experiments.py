@@ -1,4 +1,7 @@
-## see https://wordseg.readthedocs.io
+## n.b. uses python 3 wordseg virtualenv (wordseg needs Py3)
+# e.g. $ source ~/venvs/Py3/wordseg/bin/activate
+
+## wordseg: see https://wordseg.readthedocs.io
 from __future__ import division
 import io, collections, os, glob, csv, re
 from scipy.stats import entropy
@@ -63,9 +66,14 @@ def process_corpus(text, lang, corp, chi, utts, owus, pdict, bdict, fout):
     return lineout1
 
 ## run wordseg
-def word_seg(text, algo, lineout1, language, corpus, child):
-    # wordseg bit
+def word_seg(text, algo, lineout1, language, corpus, child, pcount, wcount):
+    # start point is output of process_corpus()
     lineout2 = deepcopy(lineout1)
+    pboundary = round(wcount/pcount, 6)
+    lineout2.append(wcount)
+    lineout2.append(pcount)
+    lineout2.append(pboundary)
+    # prepare filenames
     tmpfile = '/Users/' + uname + '/tmp/tmp.txt'
     goldfile = '/Users/' + uname + '/tmp/gold.txt'
     prepfile = '/Users/' + uname + '/tmp/prepared.txt'
@@ -81,6 +89,20 @@ def word_seg(text, algo, lineout1, language, corpus, child):
     # run wordseg command
     if algo=='dibs':  # DIBS-phrasal uses phrases (utterances) as chunks
         os.system('cat %s | wordseg-%s -t phrasal %s > %s' % (prepfile, algo, tmpfile, segfile))
+    elif algo=='baseline0':  # utterance baseline
+        os.system('cat %s | wordseg-baseline -P 0 %s > %s' % (prepfile, tmpfile, segfile))
+    elif algo=='baseline50':  # basic unit baseline
+        os.system('cat %s | wordseg-baseline -P 0.5 %s > %s' % (prepfile, tmpfile, segfile))
+    elif algo=='baseline100':  # unit baseline
+        os.system('cat %s | wordseg-baseline -P 1 %s > %s' % (prepfile, tmpfile, segfile))
+    elif algo=='oracle':  # oracle baseline: P(word|phone)
+        os.system('cat %s | wordseg-baseline -P %.6f %s > %s' % (prepfile, pboundary, tmpfile, segfile))
+    elif algo=='tpFTP':  # transitional prob: forwards
+        os.system('cat %s | wordseg-tp -d ftp %s > %s' % (prepfile, tmpfile, segfile))
+    elif algo=='tpBTP':  # transitional prob: forwards
+        os.system('cat %s | wordseg-tp -d btp %s > %s' % (prepfile, tmpfile, segfile))
+    elif algo=='tpMI':  # transitional prob: mutual information
+        os.system('cat %s | wordseg-tp -d mi %s > %s' % (prepfile, tmpfile, segfile))
     else:
         os.system('cat %s | wordseg-%s > %s' % (prepfile, algo, segfile))
     # evaluate
@@ -93,16 +115,17 @@ def word_seg(text, algo, lineout1, language, corpus, child):
     return lineout2
 
 ## open results file
-statsfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg_experiment_stats.csv'
+statsfile = '/Users/' + uname + '/Corpora/CHILDES/segmentation_experiment_stats.csv'
 statsopen = open(statsfile,'wt')
 statscsv = csv.writer(statsopen)
-statscsv.writerow(('language', 'corpus', 'child', 'n.utterances', 'prop.owus', 'tokens', 'types', 'TTR', 'boundary.entropy', 'diphone.entropy', 'zm.alpha', 'zm.X2', 'zm.p', 'wordseg', 'typeP', 'typeR', 'typeF', 'tokenP', 'tokenR', 'tokenF', 'boundary.all.P', 'boundary.all.R', 'boundary.all.F', 'boundary.noedge.P', 'boundary.noedge.R', 'boundary.noedge.F'))
+statscsv.writerow(('language', 'corpus', 'child', 'n.utterances', 'prop.owus', 'tokens', 'types', 'TTR', 'boundary.entropy', 'diphone.entropy', 'zm.alpha', 'zm.X2', 'zm.p', 'n.words', 'n.phones', 'boundary.prob', 'wordseg', 'typeP', 'typeR', 'typeF', 'tokenP', 'tokenR', 'tokenF', 'boundary.all.P', 'boundary.all.R', 'boundary.all.F', 'boundary.noedge.P', 'boundary.noedge.R', 'boundary.noedge.F'))
 
 ## input directory (the phonemized files)
 thousand = re.compile('000$')
-algos = ['baseline', 'dibs', 'tp', 'puddle']  # wordseg algorithms available on Mac
+algos = ['baseline0', 'baseline50', 'baseline100', 'oracle', 'tpFTP', 'tpBTP', 'tpMI', 'dibs', 'puddle']
 directory = '/Users/' + uname + '/Corpora/CHILDES/phonemized/'
-for filein in glob.glob(directory+'*.phonemes.txt', recursive=True):
+for filein in glob.glob(directory+'*_phonemes.txt', recursive=True):
+    print(filein)
     # parse filename
     (language, corpus, child) = filein.split('/')[-1].split('_')[0:3]
     fileout = filein.replace('phonemized', 'wordseg')
@@ -110,6 +133,8 @@ for filein in glob.glob(directory+'*.phonemes.txt', recursive=True):
     # read corpus
     phondict = collections.Counter()
     boundaries = collections.Counter()
+    phonecount = 0
+    wordcount = 0
     with io.open(filein, 'r', encoding='utf8') as myfile:
         linecount = 0
         owucount = 0
@@ -118,10 +143,12 @@ for filein in glob.glob(directory+'*.phonemes.txt', recursive=True):
             inputsofar += line
             linecount += 1
             ewords = line.count(';eword')
+            wordcount += ewords
             if ewords==1:
                 owucount += 1
             #print('utterance: %s' % (line.rstrip()))
             phones = line.split()  # split on whitespace
+            phonecount += (phones-ewords)
             for (i, phone) in enumerate(phones):
                 if i==0 or phones[i]==';eword' or phones[i-1]==';eword':
                     pass  # ignore phone 1 in utterance or word and word delimiters
@@ -136,13 +163,13 @@ for filein in glob.glob(directory+'*.phonemes.txt', recursive=True):
             if thousand.search(str(linecount)):
                 csvline1 = process_corpus(inputsofar, language, corpus, child, linecount, owucount, phondict, boundaries, fileout)
                 for a in algos:
-                    csvline2 = word_seg(inputsofar, a, csvline1, language, corpus, child)
+                    csvline2 = word_seg(inputsofar, a, csvline1, language, corpus, child, phonecount, wordcount)
                     statscsv.writerow((csvline2))
         # run again at end of file, if not round 1000 line count
         if not thousand.search(str(linecount)):
             csvline1 = process_corpus(inputsofar, language, corpus, child, linecount, owucount, phondict, boundaries, fileout)
             for a in algos:
-                csvline2 = word_seg(inputsofar, a, csvline1, language, corpus, child)
+                csvline2 = word_seg(inputsofar, a, csvline1, language, corpus, child, phonecount, wordcount)
                 statscsv.writerow((csvline2))
     myfile.close()
 

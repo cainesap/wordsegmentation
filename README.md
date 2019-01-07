@@ -15,7 +15,7 @@ And also install [R](https://www.r-project.org), along with the [zipfR](http://z
 
 Finally, this experiment depends on the [phonemizer](https://github.com/bootphon/phonemizer) and [wordseg](https://wordseg.readthedocs.io) tools developed by Alex Cristia, Mathieu Bernard, and colleagues. Please see the installation instructions on their websites. Note that phonemizer requires `festival` and/or `eSpeak` as back-end text-to-speech systems, plus optionally segments grapheme-to-phoneme mapping. We use [espeak-ng](https://github.com/espeak-ng/espeak-ng) with extended dictionaries for Cantonese, Mandarin, Russian; plus [segments](https://github.com/cldf/segments) for Japanese etc.
 
-Wordseg has various dependencies too, [detailed here](https://wordseg.readthedocs.io/en/latest/installation.html).
+Wordseg has various dependencies too, [detailed here](https://wordseg.readthedocs.io/en/latest/installation.html). Since it needs Python 3, it's cleaner to set up a virtual environment and install wordseg there.
 
 
 ## Data
@@ -27,7 +27,7 @@ Note that we removed the diary and 0notrans/0untranscribed/0extra directories in
 
 ## Directory structure
 
-In your `~/Corpora/CHILDES/` directory, you need to have at least the following subdirectories: `xml`, `non_child_utterances`, `phonemized`, plus a `~/tmp/` directory for temporary files created during the wordseg experiments.
+In your `~/Corpora/CHILDES/` directory, you need to have at least the following subdirectories: `xml`, `non_child_utterances`, `phonemized`, `wordseg`, plus a `~/tmp/` directory for temporary files created during the wordseg experiments.
 
 It's important that within `~/Corpora/CHILDES/xml/` you have subdirectories for each language: e.g. `~/Corpora/CHILDES/xml/Spanish/`, `~/Corpora/CHILDES/xml/French/`. The downloaded and unzipped CHILDES corpora go into the language appropriate directory, maintaining the structure they come in, i.e. `collectionName` or `collectionName/childName` (e.g. `Lara/` or `Brown/Adam/`).
 
@@ -41,16 +41,23 @@ Experiment output files will save to your working directory (i.e. where you down
 python3 step1_prepare_childes_xml_for_phonemizer.py
 ```
 
-2. Phonemize the corpora: transforms plain text utterances and transforms them into phonemic form with the `phonemizer` toolkit. Deals with a known set of languages, listed at the top of the script (to add new languages: add to the dictionary in the script with the new language name and eSpeak code, available by querying `espeak --voices` from the command line). Outputs a limited number of utterances (default=10000; edit in file, or set to zero to indicate no limit). Note that we used espeak-ng (version 1.49.3) for all languages except segments for Japanese. Run as --
+2. Phonemize the corpora: transforms plain text utterances and transforms them into phonemic form with the `phonemizer` toolkit. Deals with a known set of languages, listed at the top of the script (to add new languages: add to the dictionary in the script with the new language name and eSpeak code, available by querying `espeak --voices` from the command line). Outputs a limited number of utterances (default=10000; edit in file, or set to zero to indicate no limit). Note that we used espeak-ng (version 1.49.3) for all languages except segments for Japanese (note that we edited error-handling so that all invalid graphemes would be ignored rather than causing exit; to do this replace the raise error line in the strict function in `segments/src/segments/errors.py` with `return ''`). Run as --
 ```
 python3 step2_run_phonemizer.py
 ```
 
-3. Wordseg experiments:
-Run as --
+3. Wordseg experiments: prepares each phonemized file for use by wordseg. Runs selected wordseg algorithms (currently: baselines, transitional probabilities, DiBS, PUDDLE) on every file and evaluates against the true word segmentations. Requires `lnre.R` (which installs the `zipfR` library if you don't already have it) and a `~/tmp/' directory. Outputs experiment files to `~/Corpora/CHILDES/wordseg/` and a results file to `~/Corpora/CHILDES/segmentation_experiment_stats.csv`.
+
+Run within a virtual environment if that's where you've installed `wordseg`, e.g.
+```
+source ~/venvs/Py3/wordseg/bin/activate
+```
+And then run as --
+```
+python3 step3_wordsegmentation_experiments.py
 ```
 
-```
+4. Regression models: 
 
 
 ## Citation
@@ -66,4 +73,4 @@ If you use this code please cite our paper:
 }
 ```
 
-_Andrew Caines_, apc38@cam.ac.uk, _December 2018_
+_Andrew Caines_, andrew.caines@cl.cam.ac.uk, _January 2019_
