@@ -19,7 +19,7 @@ directory = '/Users/' + uname + '/Corpora/CHILDES/xml/'
 corpuscount = 0
 statsfile = '/Users/' + uname + '/Corpora/CHILDES/corpus_statistics.txt'
 with io.open(statsfile, 'w', encoding='utf8') as stats:
-    stats.write("corpuscount\tlanguage\tcorpuscollection\tchild\tthreshold\tn.non-child.utterances\tn.words\n")
+    stats.write("corpuscount\tlanguage\tcorpuscollection\tchild\tthreshold\tn.non-child.utterances\tn.words\tn.participants\n")
     for corpuspath in glob.glob(directory+'*/*/', recursive=True):
         print("Loading data from: %s" % corpuspath)
         corpus_root = nltk.data.find(corpuspath)
@@ -62,6 +62,7 @@ with io.open(statsfile, 'w', encoding='utf8') as stats:
                         if p not in plist:
                             plist.append(p)
                             #print('added to list, list is now', len(plist), 'items long')
+            n.partis = len(plist)
         
             # for each corpus, fetch all non-child utterances and reformat
             sents = []
@@ -92,7 +93,7 @@ with io.open(statsfile, 'w', encoding='utf8') as stats:
                     myfile.write(cds)
                     myfile.close()
                     print("Saved to %s" % fileout)
-                    statsline = str(corpuscount) + '\t' + language + '\t' + collection + '\t' + child + '\t' + str(threshold) + '\t' + str(sentcount) + '\t' + str(wordcount) + '\n'
+                    statsline = str(corpuscount) + '\t' + language + '\t' + collection + '\t' + child + '\t' + str(threshold) + '\t' + str(sentcount) + '\t' + str(wordcount) + '\t' + str(n.partis) + '\n'
                     stats.write(statsline)
             else:
                 print("Not saved, didn't reach the threshold")
