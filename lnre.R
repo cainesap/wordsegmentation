@@ -1,7 +1,9 @@
 ## see: http://zipfr.r-forge.r-project.org
-library(zipfR)
+if (!require("pacman")) install.packages("pacman")
+suppressMessages(library(pacman))
+pacman::p_load(zipfR)
 
-args <- commandArgs(trailingOnly = TRUE)
+args <- commandArgs(trailingOnly=T)
 filein <- args[1]
 #print(paste('Evaluating Zipfian-ness of', filein))
 
