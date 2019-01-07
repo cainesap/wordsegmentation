@@ -90,19 +90,19 @@ def word_seg(text, algo, lineout1, language, corpus, child, pcount, wcount):
     if algo=='dibs':  # DIBS-phrasal uses phrases (utterances) as chunks
         os.system('cat %s | wordseg-%s -t phrasal %s > %s' % (prepfile, algo, tmpfile, segfile))
     elif algo=='utt_baseline':  # utterance baseline
-        os.system('cat %s | wordseg-baseline -P 0 %s > %s' % (prepfile, tmpfile, segfile))
+        os.system('cat %s | wordseg-baseline -P 0 > %s' % (prepfile, segfile))
     elif algo=='rand_baseline':  # random baseline
-        os.system('cat %s | wordseg-baseline -P 0.5 %s > %s' % (prepfile, tmpfile, segfile))
+        os.system('cat %s | wordseg-baseline -P 0.5 > %s' % (prepfile, segfile))
     elif algo=='unit_baseline':  # basic unit baseline
-        os.system('cat %s | wordseg-baseline -P 1 %s > %s' % (prepfile, tmpfile, segfile))
+        os.system('cat %s | wordseg-baseline -P 1 > %s' % (prepfile, segfile))
     elif algo=='oracle':  # oracle baseline: P(word|phone)
-        os.system('cat %s | wordseg-baseline -P %.6f %s > %s' % (prepfile, pboundary, tmpfile, segfile))
+        os.system('cat %s | wordseg-baseline -P %.6f > %s' % (prepfile, pboundary, segfile))
     elif algo=='tp_ftp':  # transitional prob: forwards
-        os.system('cat %s | wordseg-tp -d ftp %s > %s' % (prepfile, tmpfile, segfile))
+        os.system('cat %s | wordseg-tp -d ftp > %s' % (prepfile, segfile))
     elif algo=='tp_btp':  # transitional prob: forwards
-        os.system('cat %s | wordseg-tp -d btp %s > %s' % (prepfile, tmpfile, segfile))
+        os.system('cat %s | wordseg-tp -d btp > %s' % (prepfile, segfile))
     elif algo=='tp_mi':  # transitional prob: mutual information
-        os.system('cat %s | wordseg-tp -d mi %s > %s' % (prepfile, tmpfile, segfile))
+        os.system('cat %s | wordseg-tp -d mi > %s' % (prepfile, segfile))
     else:
         os.system('cat %s | wordseg-%s > %s' % (prepfile, algo, segfile))
     # evaluate
