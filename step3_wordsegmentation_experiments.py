@@ -89,19 +89,19 @@ def word_seg(text, algo, lineout1, language, corpus, child, pcount, wcount):
     # run wordseg command
     if algo=='dibs':  # DIBS-phrasal uses phrases (utterances) as chunks
         os.system('cat %s | wordseg-%s -t phrasal %s > %s' % (prepfile, algo, tmpfile, segfile))
-    elif algo=='baseline0':  # utterance baseline
+    elif algo=='utt_baseline':  # utterance baseline
         os.system('cat %s | wordseg-baseline -P 0 %s > %s' % (prepfile, tmpfile, segfile))
-    elif algo=='baseline50':  # basic unit baseline
+    elif algo=='rand_baseline':  # random baseline
         os.system('cat %s | wordseg-baseline -P 0.5 %s > %s' % (prepfile, tmpfile, segfile))
-    elif algo=='baseline100':  # unit baseline
+    elif algo=='unit_baseline':  # basic unit baseline
         os.system('cat %s | wordseg-baseline -P 1 %s > %s' % (prepfile, tmpfile, segfile))
     elif algo=='oracle':  # oracle baseline: P(word|phone)
         os.system('cat %s | wordseg-baseline -P %.6f %s > %s' % (prepfile, pboundary, tmpfile, segfile))
-    elif algo=='tpFTP':  # transitional prob: forwards
+    elif algo=='tp_ftp':  # transitional prob: forwards
         os.system('cat %s | wordseg-tp -d ftp %s > %s' % (prepfile, tmpfile, segfile))
-    elif algo=='tpBTP':  # transitional prob: forwards
+    elif algo=='tp_btp':  # transitional prob: forwards
         os.system('cat %s | wordseg-tp -d btp %s > %s' % (prepfile, tmpfile, segfile))
-    elif algo=='tpMI':  # transitional prob: mutual information
+    elif algo=='tp_mi':  # transitional prob: mutual information
         os.system('cat %s | wordseg-tp -d mi %s > %s' % (prepfile, tmpfile, segfile))
     else:
         os.system('cat %s | wordseg-%s > %s' % (prepfile, algo, segfile))
@@ -122,7 +122,7 @@ statscsv.writerow(('language', 'corpus', 'child', 'n.utterances', 'prop.owus', '
 
 ## input directory (the phonemized files)
 thousand = re.compile('000$')
-algos = ['baseline0', 'baseline50', 'baseline100', 'oracle', 'tpFTP', 'tpBTP', 'tpMI', 'dibs', 'puddle']
+algos = ['utt_baseline', 'rand_baseline', 'unit_baseline', 'oracle', 'tp_ftp', 'tp_btp', 'tp_mi', 'dibs', 'puddle']
 directory = '/Users/' + uname + '/Corpora/CHILDES/phonemized/'
 for filein in glob.glob(directory+'*_phonemes.txt', recursive=True):
     print(filein)
