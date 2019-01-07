@@ -62,7 +62,7 @@ with io.open(statsfile, 'w', encoding='utf8') as stats:
                         if p not in plist:
                             plist.append(p)
                             #print('added to list, list is now', len(plist), 'items long')
-            n.partis = len(plist)
+            npartis = len(plist)
         
             # for each corpus, fetch all non-child utterances and reformat
             sents = []
@@ -93,7 +93,7 @@ with io.open(statsfile, 'w', encoding='utf8') as stats:
                     myfile.write(cds)
                     myfile.close()
                     print("Saved to %s" % fileout)
-                    statsline = str(corpuscount) + '\t' + language + '\t' + collection + '\t' + child + '\t' + str(threshold) + '\t' + str(sentcount) + '\t' + str(wordcount) + '\t' + str(n.partis) + '\n'
+                    statsline = str(corpuscount) + '\t' + language + '\t' + collection + '\t' + child + '\t' + str(threshold) + '\t' + str(sentcount) + '\t' + str(wordcount) + '\t' + str(npartis) + '\n'
                     stats.write(statsline)
             else:
                 print("Not saved, didn't reach the threshold")
