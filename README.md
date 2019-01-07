@@ -57,7 +57,7 @@ And then run as --
 python3 step3_wordsegmentation_experiments.py
 ```
 
-4. Regression models: 
+4. Statistical analysis with `step4_stats_analysis.R`: prints descriptive stats for corpora, evaluation scores, pairwise t-tests, fits regression models and makes plots. Runs in a piece-by-piece fashion in interactive R.
 
 
 ## Citation
