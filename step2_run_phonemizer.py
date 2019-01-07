@@ -24,13 +24,16 @@ print("== Phonemizing all files in: %s ==" % directory)
 
 for filein in glob.glob(directory+'*.txt', recursive=True):
     corpuscount += 1
-    language = filein.split('/')[-1].split('_')[0]  # language code for eSpeak
-    lang = langcodes[language]
+    (language, corpus, child) = filein.split('/')[-1].split('_')[0:3]
+    lang = langcodes[language]  # language code for eSpeak
     fileout = filein.replace('non_child_utterances', 'phonemized').replace('.txt', '_phonemes.txt')  # name of fileout
     print(corpuscount, filein, lang, fileout)
     # phonemize command
     if language=='Japanese':  # use segments for Japanese, as transcript in romanized form
         os.system("cat %s | phonemize -b segments -p ' ' -s ';esyll ' -w ';eword ' -l japanese -o %s" % (filein, fileout))
+    elif language=='EnglishUK' and child=='Thomas':  # English UK Thomas is a huge corpus so cap it at 2*limit
+        doublelimit = limit*2
+        os.system("head -n %i %s | phonemize -b segments -p ' ' -s ';esyll ' -w ';eword ' -l japanese -o %s" % (doublelimit, filein, fileout))
     else:
         #os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))
         os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))
