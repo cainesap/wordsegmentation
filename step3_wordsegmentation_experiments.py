@@ -70,9 +70,11 @@ def process_corpus(lcount, text, language, corpus, child, utts, owus, pdict, bdi
 def word_seg(lcount, text, algo, lineout1, language, corpus, child, pcount, wcount):
     # start point is output of process_corpus()
     lineout2 = deepcopy(lineout1)
-    pboundary = round(wcount/pcount, 6)
+    meanlength = round(pcount/wcount, 6)  # phones per word
+    pboundary = round(wcount/pcount, 6)  # words per phone
     lineout2.append(wcount)
     lineout2.append(pcount)
+    lineout2.append(meanlength)
     lineout2.append(pboundary)
     # prepare filenames
     tmpfile = '/Users/' + uname + '/tmp/tmp.txt'
@@ -99,11 +101,11 @@ def word_seg(lcount, text, algo, lineout1, language, corpus, child, pcount, wcou
     elif algo=='oracle':  # oracle baseline: P(word|phone)
         os.system('cat %s | wordseg-baseline -P %.6f > %s' % (prepfile, pboundary, segfile))
     elif algo=='tp_ftp':  # transitional prob: forwards
-        os.system('cat %s | wordseg-tp -d ftp > %s' % (prepfile, segfile))
+        os.system('cat %s | wordseg-tp -d ftp -t absolute > %s' % (prepfile, segfile))
     elif algo=='tp_btp':  # transitional prob: forwards
-        os.system('cat %s | wordseg-tp -d btp > %s' % (prepfile, segfile))
+        os.system('cat %s | wordseg-tp -d btp -t absolute > %s' % (prepfile, segfile))
     elif algo=='tp_mi':  # transitional prob: mutual information
-        os.system('cat %s | wordseg-tp -d mi > %s' % (prepfile, segfile))
+        os.system('cat %s | wordseg-tp -d mi -t absolute > %s' % (prepfile, segfile))
     else:
         os.system('cat %s | wordseg-%s > %s' % (prepfile, algo, segfile))
     # evaluate
@@ -119,7 +121,7 @@ def word_seg(lcount, text, algo, lineout1, language, corpus, child, pcount, wcou
 statsfile = '/Users/' + uname + '/Corpora/CHILDES/segmentation_experiment_stats.csv'
 statsopen = open(statsfile,'wt')
 statscsv = csv.writer(statsopen)
-statscsv.writerow(('language', 'corpus', 'child', 'n.utterances', 'prop.owus', 'tokens', 'types', 'TTR', 'boundary.entropy', 'diphone.entropy', 'zm.alpha', 'zm.X2', 'zm.p', 'n.words', 'n.phones', 'boundary.prob', 'wordseg', 'typeP', 'typeR', 'typeF', 'tokenP', 'tokenR', 'tokenF', 'boundary.all.P', 'boundary.all.R', 'boundary.all.F', 'boundary.noedge.P', 'boundary.noedge.R', 'boundary.noedge.F'))
+statscsv.writerow(('language', 'corpus', 'child', 'n.utterances', 'prop.owus', 'tokens', 'types', 'TTR', 'boundary.entropy', 'diphone.entropy', 'zm.alpha', 'zm.X2', 'zm.p', 'n.words', 'n.phones', 'mean.phones.per.word', 'boundary.prob', 'wordseg', 'typeP', 'typeR', 'typeF', 'tokenP', 'tokenR', 'tokenF', 'boundary.all.P', 'boundary.all.R', 'boundary.all.F', 'boundary.noedge.P', 'boundary.noedge.R', 'boundary.noedge.F'))
 
 ## input directory (the phonemized files)
 thousand = re.compile('000$')
@@ -147,8 +149,8 @@ for filein in glob.glob(directory+'*_phonemes.txt', recursive=True):
                 owucount += 1
             #print('utterance: %s' % (line.rstrip()))
             phones = line.split()  # split on whitespace
-            nwords = len(phones) - ewords
-            phonecount += nwords
+            nphones = len(phones) - ewords
+            phonecount += nphones
             for (i, phone) in enumerate(phones):
                 if i==0 or phones[i]==';eword' or phones[i-1]==';eword':
                     pass  # ignore phone 1 in utterance or word and word delimiters
