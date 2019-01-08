@@ -14,7 +14,7 @@ uname = getpass.getuser()
 ## get corpus stats
 def process_corpus(lcount, text, language, corpus, child, utts, owus, pdict, bdict):
     owu = owus/utts
-    lineout1 = [lang, corp, chi, utts, owu]
+    lineout1 = [language, corpus, child, utts, owu]
     # corpus types, tokens
     ordered = sorted(pdict.items(), key=lambda pair: pair[1], reverse=True)
     tokencount = sum(pdict.values())
