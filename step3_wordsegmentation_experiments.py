@@ -12,7 +12,7 @@ import getpass
 uname = getpass.getuser()
 
 ## get corpus stats
-def process_corpus(text, lang, corp, chi, utts, owus, pdict, bdict, fout):
+def process_corpus(lcount, text, language, corpus, child, utts, owus, pdict, bdict):
     owu = owus/utts
     lineout1 = [lang, corp, chi, utts, owu]
     # corpus types, tokens
@@ -27,7 +27,8 @@ def process_corpus(text, lang, corp, chi, utts, owus, pdict, bdict, fout):
     boundarydist = []
     diphonedist = []
     k=0
-    with io.open(fout, 'w', encoding='utf8') as writefile:
+    fileout = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_' + '_diphones.txt'
+    with io.open(fileout, 'w', encoding='utf8') as writefile:
         writefile.write('k\tf\type\n')
         for diph, denom in ordered:
             k+=1
@@ -50,7 +51,7 @@ def process_corpus(text, lang, corp, chi, utts, owus, pdict, bdict, fout):
     tmplnre = '/Users/' + uname + '/tmp/lnre.txt'
     cmd1 = 'rm '+ tmplnre
     os.system(cmd1)
-    cmd2 = 'Rscript lnre.R '+ fout
+    cmd2 = 'Rscript lnre.R '+ fileout
     os.system(cmd2)
     if os.path.exists(tmplnre):
         with open(tmplnre, 'r') as lnre:
@@ -66,7 +67,7 @@ def process_corpus(text, lang, corp, chi, utts, owus, pdict, bdict, fout):
     return lineout1
 
 ## run wordseg
-def word_seg(text, algo, lineout1, language, corpus, child, pcount, wcount):
+def word_seg(lcount, text, algo, lineout1, language, corpus, child, pcount, wcount):
     # start point is output of process_corpus()
     lineout2 = deepcopy(lineout1)
     pboundary = round(wcount/pcount, 6)
@@ -77,8 +78,8 @@ def word_seg(text, algo, lineout1, language, corpus, child, pcount, wcount):
     tmpfile = '/Users/' + uname + '/tmp/tmp.txt'
     goldfile = '/Users/' + uname + '/tmp/gold.txt'
     prepfile = '/Users/' + uname + '/tmp/prepared.txt'
-    segfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_segmented-by_' + algo + '.txt'
-    evalfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_segmented-by_' + algo + '_eval.txt'
+    segfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_' + '_segmented-by_' + algo + '.txt'
+    evalfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_' + '_segmented-by_' + algo + '_eval.txt'
     # write text so far to temporary file
     tmp = open(tmpfile, 'w')
     tmp.write(text)
@@ -109,7 +110,7 @@ def word_seg(text, algo, lineout1, language, corpus, child, pcount, wcount):
     os.system('cat %s | wordseg-eval %s > %s' % (segfile, goldfile, evalfile))
     with open(evalfile, 'r') as eval:
         for line in eval:
-            lineout2.append(re.sub('[^\d\.]', '', line.rstrip()))
+            lineout2.append(re.sub('^[^\d]*', '', line.rstrip()))  # strip from the start until first number encountered
     eval.close()
     print(lineout2)
     return lineout2
@@ -128,8 +129,6 @@ for filein in glob.glob(directory+'*_phonemes.txt', recursive=True):
     print(filein)
     # parse filename
     (language, corpus, child) = filein.split('/')[-1].split('_')[0:3]
-    fileout = filein.replace('phonemized', 'wordseg')
-    fileout = fileout.replace('phonemes', 'diphones')
     # read corpus
     phondict = collections.Counter()
     boundaries = collections.Counter()
@@ -162,15 +161,15 @@ for filein in glob.glob(directory+'*_phonemes.txt', recursive=True):
                         #print('count: %i' % (boundaries[diphone]))
             # reached iteration point? (round 1000)
             if thousand.search(str(linecount)):
-                csvline1 = process_corpus(inputsofar, language, corpus, child, linecount, owucount, phondict, boundaries, fileout)
+                csvline1 = process_corpus(linecount, inputsofar, language, corpus, child, linecount, owucount, phondict, boundaries)
                 for a in algos:
-                    csvline2 = word_seg(inputsofar, a, csvline1, language, corpus, child, phonecount, wordcount)
+                    csvline2 = word_seg(linecount, inputsofar, a, csvline1, language, corpus, child, phonecount, wordcount)
                     statscsv.writerow((csvline2))
         # run again at end of file, if not round 1000 line count
         if not thousand.search(str(linecount)):
-            csvline1 = process_corpus(inputsofar, language, corpus, child, linecount, owucount, phondict, boundaries, fileout)
+            csvline1 = process_corpus(linecount, inputsofar, language, corpus, child, linecount, owucount, phondict, boundaries)
             for a in algos:
-                csvline2 = word_seg(inputsofar, a, csvline1, language, corpus, child, phonecount, wordcount)
+                csvline2 = word_seg(linecount, inputsofar, a, csvline1, language, corpus, child, phonecount, wordcount)
                 statscsv.writerow((csvline2))
     myfile.close()
 
