@@ -22,7 +22,7 @@ Wordseg has various dependencies too, [detailed here](https://wordseg.readthedoc
 
 Note that these experiments were run on XML corpora downloaded from [CHILDES](https://childes.talkbank.org/data-xml). We unzip and store the files under the path `~/Corpora/CHILDES/xml/` on a Unix-like system (i.e. Mac, Linux). Our corpus selections depended on factors described in our paper. 
 
-Note that we removed the diary and 0notrans/0untranscribed/0extra directories in the Lara (Eng.UK), Braunwald, MacWhinney, Nelson (all Eng.NA) and LeeWongLeung (Cantonese) collections before further processing.
+Note that we removed the diary and 0notrans/0untranscribed/0extra directories in the Lara (Eng.UK), Braunwald, MacWhinney, Nelson (all Eng.NA) and LeeWongLeung (Cantonese) collections before further processing. We also removed specific child corpora from collections because of their starting age: Lea from French York; PIT, IDO, PRI, LAR from Indonesian Jakarta; Yun from Korean Ryu.
 
 
 ## Directory structure
