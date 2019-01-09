@@ -4,30 +4,25 @@ suppressMessages(library(pacman))
 pacman::p_load(ggplot2, reshape2, lme4)
 
 
-## load data
+## initial stats from step1: Table 1
+stats0 <- read.delim('~/Corpora/CHILDES/corpus_statistics.txt', as.is=T)
+langs <- unique(stats0$language)
+langs <- langs[order(langs)]
+for (lang in langs) {
+ subs <- subset(stats0, language==lang)
+ print(paste("====", lang))
+ print(paste('N.collect:', length(unique(subs$corpuscollection))))
+ print(paste('N.corpora:', length(unique(subs$child))))
+ print(paste('N.partic:', sum(subs$n.participants)))
+}
+
+
+## secondary stats from step3: Table 1 cont'd
 stats <- read.csv('~/Corpora/CHILDES/segmentation_experiment_stats.csv', as.is=T)
 stats$wordseg <- toupper(stats$wordseg)
 stats$language <- paste0(toupper(substring(stats$language, 1, 1)), substring(stats$language, 2))
 
-## the basic stats
-# n.languages
-length(unique(stats$language))
-# n.corpora
-length(unique(stats$corpus))
-# n.children
-length(unique(paste(stats$corpus, stats$child)))
-
-
-## CDS token counts for each lang @ 1000 and 10,000 utterances
-print('N.utterances: 1000')
-sumTokens <- 0
-for (lang in unique(stats$language)) {
-  tokenCount <- sum(subset(subset(subset(stats, language==lang), n.utterances==1000), wordseg=='RAND_BASELINE')$tokens)
-  sumTokens <- sumTokens + tokenCount
-  print(paste(lang, tokenCount))
-}
-print(paste('TOTAL:', sumTokens))
-
+# token counts for each lang @ 1000 and 10,000 utterances
 print('N.utterances: 10,000')
 sumTokens <- 0
 for (lang in unique(stats$language)) {
@@ -35,7 +30,15 @@ for (lang in unique(stats$language)) {
   sumTokens <- sumTokens + tokenCount
   print(paste(lang, tokenCount))
 }
+
+## basic stats used throughout
 print(paste('TOTAL:', sumTokens))
+# n.languages
+length(unique(stats$language))
+# n.corpora
+length(unique(stats$corpus))
+# n.children
+length(unique(paste(stats$corpus, stats$child)))
 
 
 ## eval means for each wordseg model (Table 2)
