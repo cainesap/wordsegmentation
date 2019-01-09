@@ -27,7 +27,7 @@ def process_corpus(lcount, text, language, corpus, child, utts, owus, pdict, bdi
     boundarydist = []
     diphonedist = []
     k=0
-    fileout = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_' + '_diphones.txt'
+    fileout = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_diphones.txt'
     with io.open(fileout, 'w', encoding='utf8') as writefile:
         writefile.write('k\tf\type\n')
         for diph, denom in ordered:
@@ -80,8 +80,8 @@ def word_seg(lcount, text, algo, lineout1, language, corpus, child, pcount, wcou
     tmpfile = '/Users/' + uname + '/tmp/tmp.txt'
     goldfile = '/Users/' + uname + '/tmp/gold.txt'
     prepfile = '/Users/' + uname + '/tmp/prepared.txt'
-    segfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_' + '_segmented-by_' + algo + '.txt'
-    evalfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_' + '_segmented-by_' + algo + '_eval.txt'
+    segfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_' + 'segmented-by_' + algo + '.txt'
+    evalfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_' + 'segmented-by_' + algo + '_eval.txt'
     # write text so far to temporary file
     tmp = open(tmpfile, 'w')
     tmp.write(text)
