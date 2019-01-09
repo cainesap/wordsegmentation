@@ -1,7 +1,7 @@
 ## libraries
 if (!require("pacman")) install.packages("pacman")
 suppressMessages(library(pacman))
-pacman::p_load(ggplot2)
+pacman::p_load(ggplot2, reshape2, lme4)
 
 
 ## load data
@@ -9,20 +9,20 @@ stats <- read.csv('~/Corpora/CHILDES/segmentation_experiment_stats.csv', as.is=T
 stats$wordseg <- toupper(stats$wordseg)
 stats$language <- paste0(toupper(substring(stats$language, 1, 1)), substring(stats$language, 2))
 
-
-## basic stats
+## the basic stats
 # n.languages
 length(unique(stats$language))
 # n.corpora
 length(unique(stats$corpus))
 # n.children
-length(unique(stats$child))
+length(unique(paste(stats$corpus, stats$child)))
+
 
 ## CDS token counts for each lang @ 1000 and 10,000 utterances
 print('N.utterances: 1000')
 sumTokens <- 0
 for (lang in unique(stats$language)) {
-  tokenCount <- sum(subset(subset(subset(stats, language==lang), n.utterances==1000), wordseg=='BASELINE')$tokens)
+  tokenCount <- sum(subset(subset(subset(stats, language==lang), n.utterances==1000), wordseg=='RAND_BASELINE')$tokens)
   sumTokens <- sumTokens + tokenCount
   print(paste(lang, tokenCount))
 }
@@ -31,64 +31,39 @@ print(paste('TOTAL:', sumTokens))
 print('N.utterances: 10,000')
 sumTokens <- 0
 for (lang in unique(stats$language)) {
-  tokenCount <- sum(subset(subset(subset(stats, language==lang), n.utterances==10000), wordseg=='BASELINE')$tokens)
+  tokenCount <- sum(subset(subset(subset(stats, language==lang), n.utterances==10000), wordseg=='RAND_BASELINE')$tokens)
   sumTokens <- sumTokens + tokenCount
   print(paste(lang, tokenCount))
 }
 print(paste('TOTAL:', sumTokens))
 
 
-## plots of type, token, boundary P R F
-ggplot(stats, aes(x=n.utterances, y=typeP, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
-ggplot(stats, aes(x=n.utterances, y=typeR, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
-ggplot(stats, aes(x=n.utterances, y=typeF, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
-
-ggplot(stats, aes(x=n.utterances, y=tokenP, group=child)) + geom_line(aes(colour=language)) + scale_x_continuous(breaks=seq(0, 10000, 1000)) + scale_y_continuous('token precision', breaks=seq(0, 1, .1)) + facet_wrap(~wordseg) + theme_bw() + theme(text=element_text(family="Times"))
-ggplot(stats, aes(x=n.utterances, y=tokenR, group=child)) + geom_line(aes(colour=language)) + scale_x_continuous(breaks=seq(0, 10000, 1000)) + scale_y_continuous('token recall', breaks=seq(0, 1, .1)) + facet_wrap(~wordseg) + theme_bw() + theme(text=element_text(family="Times"))
-ggplot(stats, aes(x=n.utterances, y=tokenF, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
-
-ggplot(stats, aes(x=n.utterances, y=boundary.all.P, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
-ggplot(stats, aes(x=n.utterances, y=boundary.all.R, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
-ggplot(stats, aes(x=n.utterances, y=boundary.all.F, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
-
-ggplot(stats, aes(x=n.utterances, y=boundary.noedge.P, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
-ggplot(stats, aes(x=n.utterances, y=boundary.noedge.R, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
-ggplot(stats, aes(x=n.utterances, y=boundary.noedge.F, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
-
-
-
-## CHECK COLUMN NUMBERS
-
-
-## performance stats for each wordseg model
-## for table of results
-mods <- unique(stats$wordseg)
-
-algos <- c('UTT_BASELINE', 'RAND_BASELINE', 'UNIT_BASELINE', 'ORACLE', 'TP_FTP', 'TP_BTP', 'TP_MI', 'DIBS', 'PUDDLE')
-fCols <- c(17, 20, 23)
-
+## eval means for each wordseg model (Table 2)
 ## at 1000(0) utterances
+algos <- unique(stats$wordseg)
+ttbcols <- 19:27  # which columns for type, token, boundary.all?
 for (nutt in c(1000, 10000)) {
   print(paste(nutt, 'utterances'))
   subs <- subset(stats, n.utterances==nutt)
-
-  ## col.means
   for (algo in algos) {
     algo.sub <- subset(subs, wordseg==algo)
     print(paste(algo, 'means'))
-    colMeans(algo.sub[,15:26])
-    print('standard deviation')
-    quantile(unlist(lapply(algo.sub[,15:26], sd)))
+    print(colMeans(algo.sub[,ttbcols]))
+#    print('standard deviation')
+#    print(quantile(unlist(lapply(algo.sub[,ttbcols], sd))))
   }
+}
 
-  ## pairwise stats tests
+## pairwise stats tests between each model for each F-measure
+fCols <- c(21, 24, 27)
+for (nutt in c(1000, 10000)) {
   for (c in fCols) {
     print(colnames(stats)[c])
     pvalues <- c()
     for (i in 1:(length(algos)-1)) {
       x.algo <- algos[i]
       x.subs <- subset(subs, wordseg==x.algo)
-      y.aglos <- algos[(i+1):length(algos)]
+      y.algos <- algos[(i+1):length(algos)]
       for (y.algo in y.algos) {
         print(paste('Pairwise test between', x.algo, 'and', y.algo))
         y.subs <- subset(subs, wordseg==y.algo)
@@ -106,29 +81,77 @@ for (nutt in c(1000, 10000)) {
 }
 
 
+## per language stats for PUDDLE (Table 3)
+subs <- subset(subset(stats, n.utterances==10000), wordseg=='PUDDLE')
 langs <- unique(stats$language)
 lang.df <- data.frame()
+colnums <- c(8:13,16,17,19:27)  # TTR, wordlength, boundary prob, eval scores
 for (lang in langs) {
-#  print(lang)
-#  subs <- subset(u10k, language==lang)
-  subs <- subset(puddle, language==lang)
-#  subs <- subset(dibs, language==lang)
-  typeF <- mean(subs[,17])
-  tokenF <- mean(subs[,20])
-  boundary.all.F <- mean(subs[,23])
-  lineout <- data.frame(lang, typeF, tokenF, boundary.all.F)
-  lang.df <- rbind(lang.df, lineout)
+  langsub <- subset(subs, language==lang)
+  df1 <- data.frame(colMeans(langsub[,colnums]))
+  colnames(df1)[1] <- lang
+  df2 <- data.frame(t(df1))
+  lang.df <- rbind(lang.df, df2)
 }
-#print('PUDDLE')
-print('DIBS')
-print(lang.df[with(lang.df, order(-tokenF)),])
+# order by token F: whole thing
+fCols <- c(11, 14, 17)
+lang.df <- lang.df[with(lang.df, order(-tokenF)),]
+print(lang.df)
+
+# F measures only (Table 3)
+print(round(lang.df[,fCols], 3))
+
+# how much variation?
+print(lapply(lang.df[,fCols], range))
+print(lapply(lang.df[,fCols], sd))
 
 
-## regression models
-dibs <- subset(stats, wordseg=='DIBS')
-#summary(lm(data=dibs, tokenP~prop.owus+TTR+boundary.entropy+fzm.alpha))
-summary(lm(data=dibs, tokenP~prop.owus+(TTR*n.utterances)+boundary.entropy+zm.alpha+zm.X2))
 
+
+## regression models for PUDDLE token F
+range01 <- function(x){(x-min(x))/(max(x)-min(x))}  # scale between 0 and 1
 puddle <- subset(stats, wordseg=='PUDDLE')
-#summary(lm(data=puddle, tokenP~prop.owus+TTR+boundary.entropy+fzm.alpha))
-summary(lm(data=puddle, tokenP~prop.owus+(TTR*n.utterances)+boundary.entropy+zm.alpha+zm.X2))
+puddle$corpusID <- paste0(puddle$language, '_', puddle$corpus, '_', puddle$child)
+puddle$boundary.entropy <- range01(puddle$boundary.entropy)
+puddle$zm.X2 <- range01(puddle$zm.X2)
+puddle$mean.phones.per.word <- range01(puddle$mean.phones.per.word)
+
+# linear model
+mod.lm <- lm(data=puddle, tokenF ~ prop.owus+(TTR*n.utterances)+boundary.entropy+zm.alpha+zm.X2+mean.phones.per.word)
+print(summary(mod.lm))
+print(AIC(mod.lm))
+# mixed-effects
+mod.lmer <- lmer(data=puddle, tokenF ~ prop.owus+(TTR*n.utterances)+boundary.entropy+zm.alpha+zm.X2+mean.phones.per.word+(1|corpusID))
+print(summary(mod.lmer))
+print(AIC(mod.lmer))
+print(anova(mod.lmer, mod.lm))  # pass lmer object first
+
+
+## FIGURES
+## plots of type, token, boundary P R F
+algos <- unique(stats$wordseg)
+subs <- subset(stats, n.utterances==10000)
+subs$corpusID <- paste0(subs$language, '_', subs$corpus, '_', subs$child)
+submelt <- melt(subs, id.var=c('corpusID', 'wordseg'), measure.var=c('typeF', 'tokenF', 'boundary.all.F'))
+submelt$wordseg <- factor(submelt$wordseg, levels=algos)
+
+# boxplot of per model F-measures (Figure 1)
+ggplot(submelt, aes(x=variable, y=value)) + geom_boxplot(outlier.alpha=1/4) + facet_wrap(~wordseg) + theme_bw() + theme(text=element_text(family="Times")) + scale_x_discrete('') + scale_y_continuous('', breaks=seq(0, 1, .1)) 
+
+
+
+ggplot(stats, aes(x=n.utterances, y=typeP, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
+ggplot(stats, aes(x=n.utterances, y=typeR, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
+ggplot(stats, aes(x=n.utterances, y=typeF, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
+
+ggplot(stats, aes(x=n.utterances, y=tokenP, group=child)) + geom_line(aes(colour=language)) + scale_x_continuous(breaks=seq(0, 10000, 1000)) + scale_y_continuous('token precision', breaks=seq(0, 1, .1)) + facet_wrap(~wordseg) + theme_bw() + theme(text=element_text(family="Times"))
+ggplot(stats, aes(x=n.utterances, y=tokenR, group=child)) + geom_line(aes(colour=language)) + scale_x_continuous(breaks=seq(0, 10000, 1000)) + scale_y_continuous('token recall', breaks=seq(0, 1, .1)) + facet_wrap(~wordseg) + theme_bw() + theme(text=element_text(family="Times"))
+ggplot(stats, aes(x=n.utterances, y=tokenF, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
+
+ggplot(stats, aes(x=n.utterances, y=boundary.all.P, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
+ggplot(stats, aes(x=n.utterances, y=boundary.all.R, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
+ggplot(stats, aes(x=n.utterances, y=boundary.all.F, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
+
+ggplot(stats, aes(x=n.utterances, y=boundary.noedge.P, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
+ggplot(stats, aes(x=n.utterances, y=boundary.noedge.R, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()
+ggplot(stats, aes(x=n.utterances, y=boundary.noedge.F, colour=language, group=child)) + geom_line() + facet_wrap(~wordseg) + theme_bw()

@@ -37,15 +37,15 @@ for filein in glob.glob(directory+'*.txt', recursive=True):
     else:
         #os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))
         os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))
-    if language=='Mandarin':  # amendment for Chinese Mandarin: rm punctuation in phonemes and code-switching markers
-        os.system("cat %s | sed 's/\.//g; s/-//g'; s/(zh)//g; s/(en)//g' > tmp.txt" % fileout)
+    if language=='Mandarin':  # amendment for Chinese Mandarin: rm punctuation in phonemes and tone markers
+        os.system("cat %s | sed 's/\.//g; s/-//g'; s/[0-9]//g' > tmp.txt" % fileout)
         os.system("mv tmp.txt %s" % fileout)  # put back in place
     elif language=='Cantonese':  # ditto for Cantonese
-        os.system("cat %s | sed 's/\.//g; s/-//g; s/(zhy)//g; s/(en)//g' > tmp.txt" % fileout)
+        os.system("cat %s | sed 's/\.//g; s/-//g; s/(zhy)//g' > tmp.txt" % fileout)
         os.system("mv tmp.txt %s" % fileout)  # put back in place
     # limit file to first N utterances if necessary
     if limit>0:
-        os.system("head -n %i %s > tmp.txt; mv tmp.txt %s" % (limit, fileout, fileout))
+        os.system("head -n %i %s | sed 's/([a-z][a-z])//g' > tmp.txt; mv tmp.txt %s" % (limit, fileout, fileout))  # rm code-switching markers
 
 print("== FINISHED ==")
 print("Processed %i corpora in %i languages" % (corpuscount, len(langcodes)))
