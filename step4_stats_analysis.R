@@ -4,8 +4,19 @@ suppressMessages(library(pacman))
 pacman::p_load(ggplot2, reshape2, lme4)
 
 
-## initial stats from step1: Table 1
+## initial stats from step1
 stats0 <- read.delim('~/Corpora/CHILDES/corpus_statistics.txt', as.is=T)
+
+## basic stats used throughout
+# n.languages
+length(unique(stats0$language))
+# n.corpora
+length(unique(stats0$corpuscollection))
+# n.children
+length(unique(paste(stats0$corpuscollection, stats0$child)))  # should match nrow(stats0)
+
+
+## per language stats: Table 1
 langs <- unique(stats0$language)
 langs <- langs[order(langs)]
 for (lang in langs) {
@@ -30,15 +41,7 @@ for (lang in unique(stats$language)) {
   sumTokens <- sumTokens + tokenCount
   print(paste(lang, tokenCount))
 }
-
-## basic stats used throughout
-print(paste('TOTAL:', sumTokens))
-# n.languages
-length(unique(stats$language))
-# n.corpora
-length(unique(stats$corpus))
-# n.children
-length(unique(paste(stats$corpus, stats$child)))
+print(paste('TOTAL:', sumTokens))  # total word tokens in all corpora
 
 
 ## eval means for each wordseg model (Table 2)
