@@ -38,10 +38,10 @@ for filein in glob.glob(directory+'*.txt', recursive=True):
         #os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))
         os.system("cat %s | phonemize -p ' ' -s ';esyll ' -w ';eword ' -l %s -o %s" % (filein, lang, fileout))
     if language=='Mandarin':  # amendment for Chinese Mandarin: rm punctuation in phonemes and tone markers
-        os.system("cat %s | sed 's/\.//g; s/-//g'; s/[0-9]//g' > tmp.txt" % fileout)
+        os.system("cat %s | sed 's/\.//g; s/-//g; s/[0-9]//g' > tmp.txt" % fileout)
         os.system("mv tmp.txt %s" % fileout)  # put back in place
-    elif language=='Cantonese':  # ditto for Cantonese
-        os.system("cat %s | sed 's/\.//g; s/-//g; s/(zhy)//g' > tmp.txt" % fileout)
+    elif language=='Cantonese':  # ditto for Cantonese plus 3-chr lang marker
+        os.system("cat %s | sed 's/\.//g; s/-//g; s/[0-9]//g; s/(zhy)//g' > tmp.txt" % fileout)
         os.system("mv tmp.txt %s" % fileout)  # put back in place
     # limit file to first N utterances if necessary
     if limit>0:
