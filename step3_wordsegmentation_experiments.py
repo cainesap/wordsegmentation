@@ -27,20 +27,20 @@ def process_corpus(lcount, text, language, corpus, child, utts, owus, pdict, bdi
     boundarydist = []
     diphonedist = []
     k=0
-    fileout = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_diphones.txt'
-    with io.open(fileout, 'w', encoding='utf8') as writefile:
-        writefile.write('k\tf\type\n')
+    diphfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_diphone-system.txt'
+    with io.open(diphfile, 'w', encoding='utf8') as writefile:
+        writefile.write('k\tf\type\trel.freq\tboundary.prob\n')  # only columns 1-3 are used by lnre.R
         for diph, denom in ordered:
             k+=1
             if bdict[diph]:
                 num = bdict[diph]
             else:
                 num = 0
-            prob = num / denom  # boundary prob
-            boundarydist.append(prob)
+            boundprob = num / denom  # boundary prob
+            boundarydist.append(boundprob)
             relfreq = denom / tokencount  # diphone prob
             diphonedist.append(relfreq)
-            writefile.write('%i\t%i\t%s\n' % (k, denom, diph))
+            writefile.write('%i\t%i\t%s\n' % (k, denom, diph, relfreq, boundprob))
     writefile.close()
     # entropy calcs
     boundaryH = entropy(boundarydist, qk=None, base=2)
@@ -51,7 +51,7 @@ def process_corpus(lcount, text, language, corpus, child, utts, owus, pdict, bdi
     tmplnre = '/Users/' + uname + '/tmp/lnre.txt'
     cmd1 = 'rm '+ tmplnre
     os.system(cmd1)
-    cmd2 = 'Rscript lnre.R '+ fileout
+    cmd2 = 'Rscript lnre.R '+ diphfile
     os.system(cmd2)
     if os.path.exists(tmplnre):
         with open(tmplnre, 'r') as lnre:
@@ -80,8 +80,9 @@ def word_seg(lcount, text, algo, lineout1, language, corpus, child, pcount, wcou
     tmpfile = '/Users/' + uname + '/tmp/tmp.txt'
     goldfile = '/Users/' + uname + '/tmp/gold.txt'
     prepfile = '/Users/' + uname + '/tmp/prepared.txt'
-    segfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_' + 'segmented-by_' + algo + '.txt'
-    evalfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_' + 'segmented-by_' + algo + '_eval.txt'
+    prepfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_prepared-for-wordseg.txt'
+    segfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_segmented-by_' + algo + '.txt'
+    evalfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_segmented-by_' + algo + '_eval.txt'
     # write text so far to temporary file
     tmp = open(tmpfile, 'w')
     tmp.write(text)
