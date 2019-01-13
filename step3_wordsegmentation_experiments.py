@@ -40,7 +40,7 @@ def process_corpus(lcount, text, language, corpus, child, utts, owus, pdict, bdi
             boundarydist.append(boundprob)
             relfreq = denom / tokencount  # diphone prob
             diphonedist.append(relfreq)
-            writefile.write('%i\t%i\t%s\n' % (k, denom, diph, relfreq, boundprob))
+            writefile.write('%i\t%i\t%s\t%.6f\t%.6f\n' % (k, denom, diph, relfreq, boundprob))
     writefile.close()
     # entropy calcs
     boundaryH = entropy(boundarydist, qk=None, base=2)
