@@ -78,8 +78,7 @@ def word_seg(lcount, text, algo, lineout1, language, corpus, child, pcount, wcou
     lineout2.append(pboundary)
     # prepare filenames
     tmpfile = '/Users/' + uname + '/tmp/tmp.txt'
-    goldfile = '/Users/' + uname + '/tmp/gold.txt'
-    prepfile = '/Users/' + uname + '/tmp/prepared.txt'
+    goldfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_gold-for-wordseg.txt'
     prepfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_prepared-for-wordseg.txt'
     segfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_segmented-by_' + algo + '.txt'
     evalfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_segmented-by_' + algo + '_eval.txt'
