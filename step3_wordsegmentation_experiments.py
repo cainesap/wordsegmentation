@@ -29,7 +29,7 @@ def process_corpus(lcount, text, language, corpus, child, utts, owus, pdict, bdi
     k=0
     diphfile = '/Users/' + uname + '/Corpora/CHILDES/wordseg/' + language + '_' + corpus + '_' + child + '_' + str(lcount) + 'utterances_diphone-system.txt'
     with io.open(diphfile, 'w', encoding='utf8') as writefile:
-        writefile.write('k\tf\type\trel.freq\tboundary.prob\n')  # only columns 1-3 are used by lnre.R
+        writefile.write('k\tf\ttype\trel.freq\tboundary.prob\n')  # only columns 1-3 are used by lnre.R
         for diph, denom in ordered:
             k+=1
             if bdict[diph]:
