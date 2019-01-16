@@ -134,7 +134,7 @@ statsmelt$wordseg <- factor(statsmelt$wordseg, levels=algos)
 ggplot(statsmelt, aes(x=n.utterances, y=value, group=n.utterances)) + geom_boxplot(outlier.alpha=1/4) + facet_wrap(~wordseg) +
   theme_bw() + theme(text=element_text(family="Times")) + scale_x_continuous('Corpus size (utterances)') + scale_y_continuous('', breaks=seq(0, 1, .1)) 
 
-# boxplots of language properties: use puddle (one model only) to avoid repetition of datapoints
+# boxplots of language properties: use puddle (one model only) to avoid repetition of datapoints (Figure 3)
 puddle <- subset(stats, wordseg=='PUDDLE')
 statsmelt <- melt(puddle, id.var=c('corpusID', 'n.utterances', 'language'),
   measure.var=c('types', 'TTR', 'prop.owus', 'boundary.entropy', 'zm.alpha', 'mean.phones.per.word'))
