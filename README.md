@@ -20,9 +20,25 @@ Wordseg has various dependencies too, [detailed here](https://wordseg.readthedoc
 
 ## Data
 
-Note that these experiments were run on XML corpora downloaded from [CHILDES](https://childes.talkbank.org/data-xml). We unzip and store the files under the path `~/Corpora/CHILDES/xml/` on a Unix-like system (i.e. Mac, Linux). Our corpus selections depended on factors described in our paper. 
+Note that these experiments were run on XML corpora downloaded from [CHILDES](https://childes.talkbank.org/data-xml). We unzip and store the files under the path `~/Corpora/CHILDES/xml/` on a Unix-like system (i.e. Mac, Linux). Our corpus selections depended on factors described in our paper. Our used dataset is available as a zip file upon request.
 
-Note that we removed the diary and 0notrans/0untranscribed/0extra directories in the Lara (Eng.UK), Braunwald, MacWhinney, Nelson (all Eng.NA) and LeeWongLeung (Cantonese) collections before further processing. We also removed specific child corpora from collections because of their starting age: Lea from French York; PIT, IDO, PRI, LAR from Indonesian Jakarta; Yun from Korean Ryu.
+Here are the corpora included in our study:
+
+| Language | Corpus | Language | Corpus | Language | Corpus |
+| -------- | ------ | -------- | ------ | -------- | ------ |
+| Basque | Luque | German | Leo, Miller, Rigol, Szagun, Wagner | Mandarin | Tong, Zhou3 |
+| Cantonese | LeeWongLeung | Greek | Doukas | Norwegian | Ringstad |
+| Croatian | Kovacevic | Hungarian | Bodor, MacWhinney, Reger | PortugueseBR | Florianopolis |
+| Danish | Plunkett | Icelandic | Kari | PortuguesePT | Santos |
+| Dutch | Gillis, Groningen, VanKampen | Indonesian | Jakarta | Romanian | Avram |
+| EnglishNA | Bloom70, Braunwald, Brent, Brown, Cornell, Gelman, MacWhinney, NewmanRatner, Peters, Post, Rollins, Sachs, Soderstrom, Suppes, Tardif, Valian | Irish | Gaeltacht | Serbian | SCECL |
+| EnglishUK | Korman, Lara, MPI-EVA-Manchester, Manchester, Nuffield, Thomas | Italian | Tonelli | Spanish | Aguirre, JacksonThal, Nieva, OreaPine, Ornat, Vila |
+| Estonian | Vija, Zupping | Japanese | Ishii, MiiPro, Miyata | Swedish| Lund |
+| Farsi | Family | Korean | Jiwon, Ryu | Turkish | Aksu |
+| French | York | | | | |
+
+
+Note that we removed the diary and 0notrans/0untranscribed/0extra directories in the Lara (Eng.UK), Braunwald, MacWhinney, Nelson (all Eng.NA) and LeeWongLeung (Cantonese) collections before further processing. We also removed specific child corpora from collections because of their starting age being over 2 years: Lea from French York; PIT, IDO, PRI, LAR from Indonesian Jakarta; Yun from Korean Ryu.
 
 
 ## Directory structure
