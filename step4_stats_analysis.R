@@ -5,7 +5,7 @@ pacman::p_load(ggplot2, reshape2, lme4, MuMIn, jtools)
 
 
 ## initial stats from step1
-stats0 <- read.delim('~/Corpora/CHILDES/corpus_statistics.txt', as.is=T)
+stats0 <- read.delim('~/Corpora/CHILDES/wordseg/corpus_statistics.txt', as.is=T)
 
 ## basic stats used throughout
 # n.languages
@@ -33,7 +33,7 @@ print(paste('Total participants:', totalPartis))  # total n.participants
 
 
 ## secondary stats from step3 wordseg experiments
-stats <- read.csv('~/Corpora/CHILDES/segmentation_experiment_stats.csv', as.is=T)
+stats <- read.csv('~/Corpora/CHILDES/wordseg/segmentation_experiment_stats.csv', as.is=T)
 stats$wordseg <- toupper(stats$wordseg)
 stats$language <- paste0(toupper(substring(stats$language, 1, 1)), substring(stats$language, 2))
 
@@ -98,6 +98,15 @@ colnums <- c(8:13,16,17,19:27)  # TTR, wordlength, boundary prob, eval scores
 for (lang in langs) {
   langsub <- subset(subs, language==lang)
   df1 <- data.frame(colMeans(langsub[,colnums]))
+  # add size and variance info
+  for (col in c(21,24,27)) {
+    stdev <- sd(langsub[,col])
+    df1 <- rbind(df1, stdev)
+    rownames(df1)[nrow(df1)] <- paste0('sd.', colnames(langsub)[col])
+  }
+  sampsize <- nrow(langsub)
+  df1 <- rbind(df1, sampsize)
+  rownames(df1)[nrow(df1)] <- 'sample.size'
   colnames(df1)[1] <- lang
   df2 <- data.frame(t(df1))
   lang.df <- rbind(lang.df, df2)
@@ -120,6 +129,7 @@ print(round(lang.df[,fCols], 3))
 ## plots of type, token, boundary P R F
 algos <- unique(stats$wordseg)
 stats$corpusID <- paste0(stats$language, '_', stats$corpus, '_', stats$child)
+stats$utt.length <- stats$tokens / stats$n.utterances
 
 # boxplot of per model F-measures (Figure 1)
 subs <- subset(stats, n.utterances==10000)
@@ -134,12 +144,13 @@ statsmelt$wordseg <- factor(statsmelt$wordseg, levels=algos)
 ggplot(statsmelt, aes(x=n.utterances, y=value, group=n.utterances)) + geom_boxplot(outlier.alpha=1/4) + facet_wrap(~wordseg) +
   theme_bw() + theme(text=element_text(family="Times")) + scale_x_continuous('Corpus size (utterances)') + scale_y_continuous('', breaks=seq(0, 1, .1)) 
 
-# boxplots of language properties: use puddle (one model only) to avoid repetition of datapoints (Figure 3)
+# boxplots of language properties: use puddle (one model only) to avoid repetition of datapoints (Figure 3) UPDATED IN REVISION 2
 puddle <- subset(stats, wordseg=='PUDDLE')
 statsmelt <- melt(puddle, id.var=c('corpusID', 'n.utterances', 'language'),
-  measure.var=c('types', 'TTR', 'prop.owus', 'boundary.entropy', 'zm.alpha', 'mean.phones.per.word'))
+  measure.var=c('mean.phones.per.word', 'utt.length', 'TTR', 'prop.owus', 'boundary.entropy', 'zm.alpha'))
 # relabel for plot
-levels(statsmelt$variable) <- c('types', 'type-token ratio', 'one-word utterance prop.', 'H(boundary diphones)', 'Zipf-Mandelbrot (α)', 'phoneme/word (μ)')
+#levels(statsmelt$variable) <- c('types', 'type-token ratio', 'one-word utterance prop.', 'H(boundary diphones)', 'Zipf-Mandelbrot (α)', 'phoneme/word (μ)')
+levels(statsmelt$variable) <- c('phoneme/token (μ)', 'token/utterance (μ)', 'type-token ratio', 'one-word utterance prop.', 'H(boundary diphones)', 'Zipf-Mandelbrot (α)')
 ggplot(statsmelt, aes(x=n.utterances, y=value, group=n.utterances)) + geom_boxplot(outlier.alpha=1/4) + facet_wrap(~variable, scales='free') +
   theme_bw() + theme(text=element_text(family="Times")) + scale_x_continuous('Corpus size (utterances)', breaks=seq(0,10000,2000)) + scale_y_continuous('') 
 
@@ -201,3 +212,28 @@ anova(mod5, mod4)
 anova(mod5, mod3)
 anova(mod5, mod2)
 anova(mod5, mod1)
+
+
+# paper revision 2: add utterance length
+puddle$utt.length <- range01(puddle$utt.length)  # scale it
+
+mod1 <- lm(data=puddle, tokenF ~ prop.owus+TTR+boundary.entropy+zm.alpha+zm.X2+mean.phones.per.word+utt.length)
+r.squaredGLMM(mod1)
+AIC(mod1)
+
+mod2 <- lm(data=puddle, tokenF ~ prop.owus+(TTR*n.utterances)+boundary.entropy+zm.alpha+zm.X2+mean.phones.per.word+utt.length)
+r.squaredGLMM(mod2)
+AIC(mod2)
+
+mod4 <- lm(data=puddle, tokenF ~ prop.owus+(TTR*n.utterances)+boundary.entropy+zm.alpha+zm.X2+mean.phones.per.word+isGermanic+isItalic+utt.length)
+r.squaredGLMM(mod4)
+AIC(mod4)
+
+mod6 <- lmer(data=puddle, tokenF ~ prop.owus+(TTR*n.utterances)+boundary.entropy+zm.alpha+zm.X2+mean.phones.per.word+isGermanic+isItalic+(1|corpusID)+utt.length)
+r.squaredGLMM(mod6)
+AIC(mod6)
+summ(mod6, scale=T)  # from jtools
+
+anova(mod6, mod4)
+anova(mod6, mod2)
+anova(mod6, mod1)
