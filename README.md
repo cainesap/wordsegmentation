@@ -81,12 +81,12 @@ python3 step3_wordsegmentation_experiments.py
 If you use this code please cite our paper:
 
 ```
-@article{caines-et-al-xxxx,
+@article{caines-et-al-2019,
   author = {Andrew Caines and Emma Altmann-Richer and Paula Buttery},
-  year = {submitted},
+  year = {2019},
   title = {The cross-linguistic performance of word segmentation models over time},
   journal = {Journal of Child Language},
 }
 ```
 
-_Andrew Caines_, andrew.caines@cl.cam.ac.uk, _January 2019_
+_Andrew Caines_, andrew.caines@cl.cam.ac.uk, _September 2019_
